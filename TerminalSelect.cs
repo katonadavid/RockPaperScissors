@@ -8,21 +8,48 @@ enum SelectionType
 
 class TerminalSelect<T>
 {
-    private Option<T>[] _options;
+    private List<Option<T>> _options;
     private int? _selectedIndex = null;
+    private string? _label;
+    public delegate void OptionSelectedHandler(T selectedOption); 
+    public event OptionSelectedHandler? OnOptionSelected;
 
-    public TerminalSelect(Option<T>[] options, int? selectedIndex = null)
+    public TerminalSelect(List<Option<T>> options, string? label = null, int? selectedIndex = null)
     {
-        Console.WriteLine("options added");
-        Array.ForEach(options, Console.WriteLine);
-
         _options = options;
         _selectedIndex = selectedIndex;
+        _label = label;
     }
 
-    public void ListOptions()
+    public void PromptSelection()
     {
-        for (int i = 0; i < _options.Length; i++)
+        var optionSelected = false;
+        while (!optionSelected)
+        {
+            Console.Clear();
+            Console.WriteLine($"{_label} \n");
+            ListOptions();
+            var input = Console.ReadKey(true);
+
+            switch (input.Key)
+            {
+                case ConsoleKey.DownArrow:
+                    SelectNext();
+                    break;
+                case ConsoleKey.UpArrow:
+                    SelectPrevious();
+                    break;
+                case ConsoleKey.Enter:
+                    optionSelected = true;
+                    OnOptionSelected?.Invoke(this._options.Find(o => o.IsSelected == true).Value);
+                    break;
+            }
+        }
+    }
+
+    private void ListOptions()
+    {
+        for (int i = 0; i < _options.Count; i++)
         {
             if (_selectedIndex.HasValue)
             {
@@ -50,16 +77,11 @@ class TerminalSelect<T>
         this.SelectOption(SelectionType.Previous);
     }
 
-    public Option<T> GetSelectedOption ()
-    {
-        return _options.First(i => i.IsSelected == true);
-    }
-
     private void SelectOption(SelectionType type)
     {
         int? currentlySelectedIndex = null;
 
-        for (int i = 0; i < _options.Length; i++)
+        for (int i = 0; i < _options.Count; i++)
         {
             if (_options[i].IsSelected == true)
             {
@@ -75,12 +97,12 @@ class TerminalSelect<T>
         {
             if (type == SelectionType.Next)
             {
-                nextIndex = currentlySelectedIndex == _options.Length - 1 ? 0 : currentlySelectedIndex.Value + 1;
+                nextIndex = currentlySelectedIndex == _options.Count - 1 ? 0 : currentlySelectedIndex.Value + 1;
             }
 
             if (type == SelectionType.Previous)
             {
-                nextIndex = currentlySelectedIndex == 0 ? _options.Length - 1 : currentlySelectedIndex.Value - 1;
+                nextIndex = currentlySelectedIndex == 0 ? _options.Count - 1 : currentlySelectedIndex.Value - 1;
             }
         }
 

@@ -2,38 +2,43 @@
 
 class Program
 {
+    static TerminalSelect<Weapon> terminalSelect =
+            new(BattleHelper.weapons.Select(w => new Option<Weapon>(w.Name, w)).ToList(), "Choose your weapon!");
+
     static void Main(string[] args)
     {
-        TerminalSelect<Weapon> terminalSelect = new(BattleHelper.weapons.Select(w => new Option<Weapon>(w.Name, w)).ToArray());
-        var weaponChosen = false;
-
-        while (!weaponChosen)
+        terminalSelect.OnOptionSelected += (Weapon selectedWeapon) =>
         {
-            Console.Clear();
-            Console.WriteLine("Choose your weapon! \n");
-            terminalSelect.ListOptions();
-            var input = Console.ReadKey();
+            var computerWeapon = BattleHelper.GetComputerWeapon();
+            Console.WriteLine($"\nYou've chosen {selectedWeapon.Name}");
+            Console.WriteLine($"The computer has chosen {computerWeapon.Name}\n");
 
-            switch (input.Key)
+            PrintResult(BattleHelper.Fight(selectedWeapon, computerWeapon));
+            AskForReplay();
+        };
+        terminalSelect.PromptSelection();
+    }
+
+    static void AskForReplay()
+    {
+        Console.WriteLine("Play again? [Enter = Yes, Esc = No]");
+
+        ConsoleKeyInfo answer;
+
+        do
+        {
+            answer = Console.ReadKey(true);
+            if (answer.Key == ConsoleKey.Enter)
             {
-                case ConsoleKey.DownArrow:
-                    terminalSelect.SelectNext();
-                    break;
-                case ConsoleKey.UpArrow:
-                    terminalSelect.SelectPrevious();
-                    break;
-                case ConsoleKey.Enter:
-                    weaponChosen = true;
-
-                    var userWeapon = terminalSelect.GetSelectedOption().Value;
-                    var computerWeapon = BattleHelper.GetComputerWeapon();
-                    Console.WriteLine($"\nYou've chosen {userWeapon.Name}");
-                    Console.WriteLine($"The computer has chosen {computerWeapon.Name}\n");
-
-                    PrintResult(BattleHelper.Fight(userWeapon, computerWeapon));
-                    break;
+                terminalSelect.PromptSelection();
+            }
+            if (answer.Key == ConsoleKey.Escape)
+            {
+                Console.WriteLine("Goodbye! :)");
             }
         }
+        while (answer.Key != ConsoleKey.Enter && answer.Key != ConsoleKey.Escape);
+
     }
 
     static void PrintResult(BattleResult battleResult)
