@@ -4,7 +4,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        TerminalSelect<Weapon> terminalSelect = new(BattleHelper.weapons.Select(w => new Option<Weapon>(w.Name, w)).ToArray(), 0);
+        TerminalSelect<Weapon> terminalSelect = new(BattleHelper.weapons.Select(w => new Option<Weapon>(w.Name, w)).ToArray());
         var weaponChosen = false;
 
         while (!weaponChosen)

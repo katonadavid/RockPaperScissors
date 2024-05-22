@@ -69,10 +69,10 @@ class TerminalSelect<T>
             _options[i].IsSelected = false;
         }
 
+        int nextIndex = 0;
+
         if (currentlySelectedIndex.HasValue)
         {
-            int nextIndex = 0;
-
             if (type == SelectionType.Next)
             {
                 nextIndex = currentlySelectedIndex == _options.Length - 1 ? 0 : currentlySelectedIndex.Value + 1;
@@ -82,14 +82,9 @@ class TerminalSelect<T>
             {
                 nextIndex = currentlySelectedIndex == 0 ? _options.Length - 1 : currentlySelectedIndex.Value - 1;
             }
-
-            _options[nextIndex].IsSelected = true;
-            _selectedIndex = nextIndex;
-        }
-        else
-        {
-            throw new InvalidOperationException("Next option can not be selected because no option is selected");
         }
 
+        _options[nextIndex].IsSelected = true;
+        _selectedIndex = nextIndex;
     }
 }
